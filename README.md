@@ -101,8 +101,9 @@ GRP : Permet d'installer plusieurs composants en une seule commande
 20 : Interface  
 21 : Graphisme, portraits et sons
 
-##Remerciements
+## Remerciements
 
 Un grand merci à toutes ces personnes pour leur aide dans l'amélioration de l'outil !
 
 - [JohnBob](https://www.baldursgateworld.fr/memberlist.php?mode=viewprofile&u=16284)
+- [Deratiseur](https://www.baldursgateworld.fr/memberlist.php?mode=viewprofile&u=8352)
