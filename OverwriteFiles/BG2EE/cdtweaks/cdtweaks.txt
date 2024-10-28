@@ -1,0 +1,112 @@
+/*
+The settings in this file allow for this mod to be installed in an unattended mode, e.g.
+if you install Tweaks Anthology with the Big World Setup. A handful of components will
+otherwise pause WeiDU and wait for input; defining these values ahead of time in this
+file will instead use the values defined here instead of waiting on user input in the
+middle of installation.
+
+To use this file, rename it as cdtweaks.txt and leave it in the cdtweaks folder.
+*/
+
+// The following values are used for the Accelerate/Decelerate Romances component.
+// Set this value to 1 if you want to use the values defined here:
+OUTER_SET romance_speed_use_config_values = 1
+
+// This variable will adjust the romance speed as a percentage
+// e.g. 50 will reduce the time between romance talks to half (50%) of the current
+// time between talks; 200 would double (200%) the time between talks
+// this value must be between 20 and 500; other values will be ignored
+OUTER_SET romance_speed_factor = 80
+
+
+
+
+
+
+// The following values are used for the Romance Cheats component.
+// Set this value to 1 if you want to use the values defined here:
+OUTER_SET romance_use_config_values = 0
+
+// This variable will remove the racial requirement if set to 1
+// e.g. a value of 1 will allow Viconia to romance gnomes, or Aerie half-orcs
+OUTER_SET remove_romance_racial_requirements = 0
+
+// This variable will remove the gender-based requirements for romances if set to 1
+// e.g. a value of 1 will allow Anomen to romance males or Jaheira to romance females
+OUTER_SET remove_romance_gender_requirements = 0
+
+// This variable will allow multiple romances if set to 1
+// e.g. a value of 1 will allow you to romance both Jaheira and Aerie
+OUTER_SET romance_multiple = 0
+
+// This variable will prevent anything from ending a romance prematurely if set to 1
+// e.g. with a value of 1 you can be as mean in dialogues as you like and the romance will proceed
+// This also requires the romance_multiple, above, to be set to 1
+OUTER_SET romance_nothing_kills = 0
+
+// This variable controls whether romances start for new ToB games if set to 1
+// e.g. if set to 1, summoning Anomen via the Fate Spirit in a new game will behave as if you romanced him in SoA
+OUTER_SET romance_starts_in_ToB = 0
+
+
+
+// This next batch of variables will be used for the  Minimum Stats Cheat component.
+// Set this value to 1 if you wish to use the values defined here:
+OUTER_SET minimum_stats_use_config_values = 0
+
+// The following six stats will be used as the minimums by the component itself.
+// All values must be between 6 and 15, or 0 if you don't want to change them.
+OUTER_SET minimum_stats_strength     = 0
+OUTER_SET minimum_stats_constitution = 0
+OUTER_SET minimum_stats_dexterity    = 0
+OUTER_SET minimum_stats_intelligence = 0
+OUTER_SET minimum_stats_wisdom       = 0
+OUTER_SET minimum_stats_charisma     = 0
+
+
+
+
+// The following variables will be used for the subcomponent "Create interval saves -> Customize":
+// Set this value to 1 to activate interval save. Set it to 0 to deactivate interval save. Default: 1
+OUTER_SET interval_save_enabled = 1
+
+// Set this value to the interval between saves (in seconds). Default: 1800 seconds (30 minutes)
+OUTER_SET interval_save_delay = 1200
+
+// Set this value to 1 to allow creating interval saves during combat. Set it to 0 to forbid
+// creating interval saves during combat. Default: 0
+OUTER_SET interval_save_combat = 0
+
+// Set this value to the number of save slots to cycle through. Up to 16 save slots are allowed.
+// This value is only considered for games patched to version 2.0 or later. Default: 1 slot
+OUTER_SET interval_save_count = 3
+
+// Set this value to 1 to use the custom "Interval-Save" slot whenever a save is created.
+// Set this value to 0 to use the "Auto-Save" slot instead. Custom save slots are enforced
+// if interval_save_count > 1. This value is only considered for games patched
+// to version 2.0 or later. Default: 1
+OUTER_SET interval_save_custom_slot = 1
+
+// Set this value to 1 to show a feedback message whenever an interval save is created.
+// Set it to 0 to suppress any feedback. Default: 1
+OUTER_SET interval_save_feedback = 1
+
+// Set this value to 1 to control interval save creation by Baldur.lua configuration options.
+// Set this value to 0 to enforce using game variables to control interval save creation.
+// This value is only considered for games patched to version 2.0 or later. Default: 1
+OUTER_SET interval_save_ini = 1
+
+
+
+
+// The following variables will be used for "Remove Racial Restrictions for Single Classes"
+// Set this to 1 to change the INT penalty for half-orcs to -1 to allow for easier dual-classing
+// into mages, which also requires the "Alter Dual-class Restrictions" component to be installed
+OUTER_SET halforc_dual_to_mage = 0
+
+
+
+
+// DEPRECATED. This variable is ignored by the mod, as it's now handled directly by the installer.
+// Enabling it or setting a value will have no effect.
+// OUTER_SET always_install_unique_icons = 0
