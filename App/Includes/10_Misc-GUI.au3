@@ -10,18 +10,18 @@ EndFunc   ;==>_Misc_Search
 
 Func _Misc_Set_GConfDir($p_GameType)
 	$g_GConfDir = $g_ProgDir & '\Config\'&$p_GameType
-	If StringRegExp($p_GameType, 'BG[1-2]EE') Then
-		$g_ConnectionsConfDir = $g_ProgDir&'\Config\BWP'; make BG1EE and BG2EE use BWP Game.ini for Connections rules
-	Else
+	;If StringRegExp($p_GameType, 'BG[1-2]EE') Then
+	;	$g_ConnectionsConfDir = $g_ProgDir&'\Config\BWP'; make BG1EE and BG2EE use BWP Game.ini for Connections rules
+	;Else
 		$g_ConnectionsConfDir = $g_GConfDir
-	EndIf
+	;EndIf
 EndFunc   ;==>_Misc_SetGConfDir
 
 ; ---------------------------------------------------------------------------------------------
 ; Displays the about-screen
 ; ---------------------------------------------------------------------------------------------
 Func _Misc_AboutGUI()
-	Local $String = 'Big World Setup', $Version
+	Local $String = 'Big World Setup FR', $Version
 	Local $Current = GUICtrlRead($g_UI_Seperate[0][0]) + 1
 	; ---------------------------------------------------------------------------------------------
 	; Fetch the version number
@@ -559,10 +559,10 @@ Func _Misc_SetLang()
 	GUICtrlSetData($g_UI_Interact[1][3], $g_GameList[0][2], $g_GameList[1][2]); => installation method
 	$g_Flags[3] = IniRead($g_UsrIni, 'Options', 'ModLang', '')
 	If $g_Flags[3] = '' Then
-		If $g_ATrans[$g_ATNum] <> 'EN' Then
-			$g_Flags[3] = $g_ATrans[$g_ATNum] & ' EN'
+		If $g_ATrans[$g_ATNum] <> 'FR' Then
+			$g_Flags[3] = $g_ATrans[$g_ATNum] & ' FR'
 		Else
-			$g_Flags[3] &= 'EN'
+			$g_Flags[3] &= 'FR EN'
 		EndIf
 	EndIf
 	GUICtrlSetData($g_UI_Interact[2][5], $g_Flags[3])
@@ -823,13 +823,13 @@ Func _Misc_SwitchGUIToInstallMethod()
 	GUICtrlSetState($g_UI_Button[2][2], $GUI_SHOW)
 	GUICtrlSetPos($g_UI_Static[2][1], 30, 85, 370, 15)
 	GUICtrlSetPos($g_UI_Interact[2][1], 30, 100, 300, 20); BG1/BG1EE-for-BGT/EET-folder default position
-	GUICtrlSetPos($g_UI_Button[2][1], 350, 100, 50, 20)
+	GUICtrlSetPos($g_UI_Button[2][1], 340, 100, 70, 20)
 	GUICtrlSetPos($g_UI_Static[2][2], 30, 135, 370, 15)
 	GUICtrlSetPos($g_UI_Interact[2][2], 30, 150, 300, 20); BG2/BG2EE/IWD1/IWD2/PST folder default position
-	GUICtrlSetPos($g_UI_Button[2][2], 350, 150, 50, 20)
+	GUICtrlSetPos($g_UI_Button[2][2], 340, 150, 70, 20)
 	GUICtrlSetPos($g_UI_Static[2][3], 30, 190, 370, 15)
 	GUICtrlSetPos($g_UI_Interact[2][3], 30, 205, 300, 20); download folder position same for all game types
-	GUICtrlSetPos($g_UI_Button[2][3], 350, 205, 50, 20)
+	GUICtrlSetPos($g_UI_Button[2][3], 340, 205, 70, 20)
 	If StringRegExp($g_Flags[14], 'BWS|BWP|BG2EE') Then; includes BGT/EET
 		If $g_Flags[14] = 'BG2EE' Then; BG2EE or EET
 			If $HideEET Then
@@ -838,7 +838,7 @@ Func _Misc_SwitchGUIToInstallMethod()
 				GUICtrlSetState($g_UI_Button[2][1], $GUI_HIDE)
 				GUICtrlSetData($g_UI_Interact[2][1], '-'); disable BG1EE-folder tests
 			Else; EET is enabled
-				GUICtrlSetData($g_UI_Static[2][1], "Baldur's Gate I: Enhanced Edition, put '-' if you want only BG2:EE")
+				GUICtrlSetData($g_UI_Static[2][1], "Baldur's Gate I: Enhanced Edition, mettez '-' si vous n'installez que des mods pour BG2:EE")
 				GUICtrlSetState($g_UI_Static[2][1], $GUI_SHOW)
 				GUICtrlSetState($g_UI_Interact[2][1], $GUI_SHOW); show BG1EE-for-EET folder
 				GUICtrlSetState($g_UI_Button[2][1], $GUI_SHOW)
@@ -849,7 +849,7 @@ Func _Misc_SwitchGUIToInstallMethod()
 			$g_GameDir = $g_BG2EEDir; use BG2EEDir for now even if EET is enabled
 			GUICtrlSetData($g_UI_Interact[2][2], $g_BG2EEDir)
 		Else; BWS/BWP - includes BGT
-			GUICtrlSetData($g_UI_Static[2][1], "Baldur's Gate I, put '-' if you want only BG2")
+			GUICtrlSetData($g_UI_Static[2][1], "Baldur's Gate I, tapez '-' si vous ne voulez que BG2")
 			GUICtrlSetState($g_UI_Static[2][1], $GUI_SHOW)
 			GUICtrlSetState($g_UI_Interact[2][1], $GUI_SHOW); show BG1-for-BGT folder
 			GUICtrlSetState($g_UI_Button[2][1], $GUI_SHOW)
@@ -875,7 +875,7 @@ Func _Misc_SwitchGUIToInstallMethod()
 ;		GUICtrlSetData($g_UI_Interact[2][2], '-'); disable BG2EE-folder tests
 ;		GUICtrlSetPos($g_UI_Static[2][1], 30, 135, 370, 15)
 ;		GUICtrlSetPos($g_UI_Interact[2][1], 30, 150, 300, 20); move BG1EE folder down
-;		GUICtrlSetPos($g_UI_Button[2][1], 350, 150, 50, 20)
+;		GUICtrlSetPos($g_UI_Button[2][1], 340, 150, 70, 20)
 ;		GUICtrlSetData($g_UI_Static[2][1], "Baldur's Gate I: Enhanced Edition")
 ;		GUICtrlSetState($g_UI_Static[2][1], $GUI_SHOW)
 ;		GUICtrlSetState($g_UI_Interact[2][1], $GUI_SHOW); show BG1EE folder

@@ -1,6 +1,6 @@
 AutoItSetOption('TrayIconHide', 1)
 
-Global $g_ProgName = 'Big World Setup'
+Global $g_ProgName = 'Big World Setup FR'
 Global $g_BaseDir = StringLeft(@ScriptDir, StringInStr(@ScriptDir, '\', 1, -1) - 1)
 Global $g_LogDir = $g_BaseDir & '\Logs'
 Global $g_DebugFile = $g_LogDir & '\Logs\BWS-Debug-AutoIt.log'
@@ -254,7 +254,7 @@ EndFunc
 ; Returns the splitted transplation-string
 ; ---------------------------------------------------------------------------------------------
 Func _GetSTR($p_Num)
-	$Tra=IniRead('Config\User.ini', 'Options', 'Lang', 'EN')
+	$Tra=IniRead('Config\User.ini', 'Options', 'Lang', 'FR')
 	$Value = IniRead('Config\Translation-'&$Tra&'.ini', 'TR-Trace',  $p_Num, '')
 	$Value = StringReplace($Value, '|', @CRLF)
 	Return $Value

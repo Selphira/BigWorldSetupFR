@@ -11,7 +11,7 @@ TraySetIcon(@ScriptDir & '\Pics\BWS.ico'); sets the tray-icon
 #Region Global vars
 ; Global are named with a $g_ , parameters with a $p_ . Normal/Local variables don't have a prefix.
 ; files and folders
-Global $g_ProgName = 'Big World Setup'
+Global $g_ProgName = 'Big World Setup FR'
 Global $g_BaseDir = StringLeft(@ScriptDir, StringInStr(@ScriptDir, '\', 1, -1) - 1)
 Global $g_ProgDir = $g_BaseDir & '\App', $g_LogDir = $g_BaseDir & '\Logs', $g_DownDir = $g_BaseDir & '\App-Downloads'
 Global $g_BWSIni = $g_ProgDir & '\Config\Setup.ini', $g_MODIni, $g_UsrIni = $g_ProgDir & '\Config\User.ini', $g_LogFile = $g_LogDir & '\BWS-Debug.log'
@@ -41,7 +41,7 @@ Global $g_ConsoleOutput = '', $g_STDStream, $g_ConsoleOutput, $g_pQuestion = 0
 ; program options and misc
 Global $g_Order, $g_Setups, $g_Skip, $g_Clip; available setups, items to skip
 Global $g_CurrentPackages, $g_fLock, $g_FItem = IniRead($g_BWSIni, 'Options', 'Start', '1'); selected packages, fixed mods and last processed item
-Global $g_ATrans = StringSplit(IniRead($g_BWSIni, 'Options', 'AppLang', 'EN'), '|'), $g_ATNum = 1, $g_MLang; available application translations
+Global $g_ATrans = StringSplit(IniRead($g_BWSIni, 'Options', 'AppLang', 'FR|EN'), '|'), $g_ATNum = 1, $g_MLang; available application translations
 Global $g_UDll = DllOpen('user32.dll'); we have to use this for detecting the mouse or keboard-usage
 Global $g_Down[6][2]; used for updating download-progressbar
 
@@ -200,7 +200,7 @@ Func Au3GetVal($p_Num = 0)
 				IniWrite($g_BWSIni, 'Order', 'Au3Exit', 1)
 				Exit
 			EndIf
-			While StringRegExp($Array[$a], '(?i)\A(CMD|ANN|DWN|GRP)') And $a < $Array[0]
+			While StringRegExp($Array[$a], '(?i)\A(CMD|ANN|DWN|GRP|CMT|PAUSE)') And $a < $Array[0]
 				$a += 1
 			WEnd
 			$Split = StringSplit($Array[$a], ';')
@@ -434,7 +434,7 @@ Func _GetGlobalData($p_Game='')
 	; Open file-handles
 	If Not FileExists($g_GConfDir) Then DirCreate($g_GConfDir)
 	Local $h_Mod=FileOpen($g_GConfDir&'\Mod.ini', 2)
-	Local $Lang=StringSplit('EN', '|'); BWS user interface languages
+	Local $Lang=StringSplit('FR|EN', '|'); BWS user interface languages
 	For $l=1 to $Lang[0]
 		Assign('h_Mod_'&$Lang[$l], FileOpen($g_GConfDir&'\Mod-'&$Lang[$l]&'.ini', 1)); don't overwrite file, contains [Preselection]
 		FileWrite(Eval('h_Mod_'&$Lang[$l]), @CRLF&@CRLF&'[Description]'&@CRLF)

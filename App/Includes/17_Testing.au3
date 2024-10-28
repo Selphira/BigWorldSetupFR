@@ -8,11 +8,11 @@ Func Au3Detect($p_Num = 0)
 	Local $Lang = ''
 	If IniRead($g_UsrIni, 'Options', 'AppLang', '') = '' Then; search only on first startup
 		$g_ATNum = '1'
-		$Lang = IniRead($g_UsrIni, 'Options', 'AppLang', 'EN')
+		$Lang = IniRead($g_UsrIni, 'Options', 'AppLang', 'FR')
 		IniWrite($g_UsrIni, 'Options', 'Download', $g_DownDir)
 	Else
 		$g_DownDir = IniRead($g_UsrIni, 'Options', 'Download', $g_DownDir)
-		$Lang = IniRead($g_UsrIni, 'Options', 'AppLang', 'EN')
+		$Lang = IniRead($g_UsrIni, 'Options', 'AppLang', 'FR')
 		For $a = 1 To $g_ATrans[0]
 			If $g_ATrans[$a] = $Lang Then ExitLoop
 		Next
@@ -296,34 +296,6 @@ Func _Test_ArchivesExist()
 EndFunc   ;==>_Test_ArchivesExist
 
 ; ---------------------------------------------------------------------------------------------
-; Search if the german textpatch is needed
-; ---------------------------------------------------------------------------------------------
-Func _Test_CheckBG1TP()
-	Local $CurrentVersion, $InstalledVersion, $Component
-	If Not StringRegExp($g_Flags[14], 'BWP|BWS') Then Return 1; no BWP/BWS-installation (BG1)
-	If $g_MLang[1] <> 'GE' Then Return 1
-	If $g_BG1Dir = '-' Then Return 1
-	$CurrentVersion=IniRead($g_ModIni, 'BG1TP', 'Rev', '')
-	If FileExists($g_BG1Dir&'\WeiDU.log') Then
-		Local $Array = StringSplit(StringStripCR(FileRead($g_BG1Dir & '\Weidu.log')), @LF)
-		For $a = $Array[0] To 1 Step -1
-			If StringRegExp($Array[$a], '(?i)\A~.{0,}(setup\x2d|\x2f|)bg1tp.tp2~\s#0\s#0') Then
-				$Component = StringRegExpReplace($Array[$a], '\A.*\s//\s', '')
-				$InstalledVersion=StringRegExpReplace($Component, '(?i).*:\sv|\r|\n', '')
-				ExitLoop
-			EndIf
-		Next
-	EndIf
-	If $CurrentVersion > $InstalledVersion And $InstalledVersion <> '' Then; Remove and Install
-		Return -1
-	ElseIf $CurrentVersion > $InstalledVersion And $InstalledVersion = '' Then; Install
-		Return 0
-	Else; Do nothing
-		Return 1
-	EndIf
-EndFunc    ;==>_Test_CheckBG1TP
-
-; ---------------------------------------------------------------------------------------------
 ; Searches for correct spanish bg1-sounds
 ; ---------------------------------------------------------------------------------------------
 Func _Test_CheckTotSCFiles_BG1()
@@ -456,8 +428,6 @@ Func _Test_CheckRequiredFiles_BG2()
 	If Not ( FileExists($BG2AliasDir & 'Movies\25movies.bif') Or FileExists($g_BG2Dir & '\' & 'Movies\25movies.bif') ) Then $Error&=_GetTR($Message, 'L2')&@CRLF; => movie-file is missing
 	If FileGetVersion($g_BG2Dir&'\bgmain.exe') = '2.5.0.2' And FileGetVersion($g_BG2Dir&'\bgmain.exe', 'PrivateBuild') = '26498' Then
 		; ok
-	ElseIf IniRead($g_MODIni, 'Classics053', 'Name', '') = 'The Classic Adventures' And FileGetVersion($g_BG2Dir&'\bgmain.exe') = '2.5.0.2' Then
-		; ok, CA patches EXE
 	Else
 		$Error&=_GetTR($Message, 'L3')&@CRLF; => patch is missing
 	EndIf
@@ -823,7 +793,7 @@ EndFunc   ;==>_Test_GetCustomTP2
 ; Keep this function consistent with _Tree_PurgeUnNeeded in Select-Tree.au3
 ; ---------------------------------------------------------------------------------------------
 Func _Test_Get_EET_Mods(); called by _Tree_EndSelection() just before starting an installation
-	Local $BG1EE_Mods='WeiDU|WeiDU64|bwinstallpack|bwtrimpack|bwfixpack|bwtextpack|bwtextpackp|'; trailing | is needed
+	Local $BG1EE_Mods='WeiDU|WeiDU64|bwinstallpack|bwtrimpack|bwfixpack|BWS-FR-Fixpack|'; trailing | is needed
 	Local $BG2EE_Mods=$BG1EE_Mods&'|'; trailing | is needed
 	; mods in the above list will still be skipped at install time, if purge rules exclude them (e.g., bwtextpackP is for RU installs only)
 	$g_Flags[21]=''; will contain BG1-mods in EET -> Empty means no BG1-install
@@ -854,6 +824,7 @@ Func _Test_Get_EET_Mods(); called by _Tree_EndSelection() just before starting a
 ;	IniWrite($g_UsrIni, 'Debug', 'EETMods', $EETMods)
 	Local $Mod, $DoBG1=0
 	For $s=1 to $Select[0]
+		If StringInStr($Select[$s], ';EET;') Then $EETMods='BG1_install_stopped'; this prevents the logic above from adding any more mods to the BG1EE list
 		If StringRegExp($Select[$s], '(?i)\A(ANN|CMD|GRP);') Then ContinueLoop
 		$Mod=StringRegExpReplace($Select[$s], '\A...;|;.*\z', '')
 		If StringRegExp($Mod, '(?i)\A('&$EETMods&')\z') Then; it's depending on EET and it's installed before EET -> this is a BG1EE-mod
@@ -863,7 +834,6 @@ Func _Test_Get_EET_Mods(); called by _Tree_EndSelection() just before starting a
 				ContinueLoop
 			EndIf
 		EndIf
-		If StringInStr($Select[$s], ';EET;') Then $EETMods='BG1_install_stopped'; this prevents the logic above from adding any more mods to the BG1EE list
 		If Not StringRegExp($Mod, '(?i)\A('&$BG1EE_Mods&')\z') Then; if it's not an BG1EE-mod, it should be BG2EE...
 			If (Not StringRegExp($BG2EE_Mods, '(?i)(\A|\x7c)'&$Mod&'(\z|\x7c)')) Then $BG2EE_Mods&=$Mod&'|'
 		EndIf

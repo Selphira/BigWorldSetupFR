@@ -4,8 +4,6 @@
 Func _Tree_EndSelection()
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Tree_EndSelection')
 	_Tree_GetCurrentSelection(1)
-	If _Test_CheckBG1TP() = 1 Then IniDelete($g_UsrIni, 'Current', 'BG1TP'); Remove download for german totsc-textpatch if not required
-	If _Test_CheckTotSCFiles_BG1() = 1 Then IniDelete($g_UsrIni, 'Current', 'BG1TotSCSound'); Remove download for spanish totsc-sounds if not required
 	_ResetInstall(0); Reset the installation-order
 	Local $Ignores[$g_Connections[0][0]][2]; save ignored warnings for reloads
 	For $c=1 to $g_Connections[0][0]
@@ -266,7 +264,7 @@ EndFunc   ;==>_Tree_GetSplittedMods
 ; ---------------------------------------------------------------------------------------------
 Func _Tree_GetTags()
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Tree_GetTags')
-	If $g_Flags[14] = 'BWS' Then
+	If $g_Flags[14] = 'BWS' Or $g_Flags[14] = 'BG2EE' Then
 		$g_UI_Menu[0][2]=StringRegExp(IniRead($g_TRAIni, 'UI-Buildtime', 'Menu[2][2]', ''), '\x7c', 3)
 	ElseIf $g_Flags[14] = 'BWP' Then
 		$g_UI_Menu[0][2]=StringRegExp(IniRead($g_TRAIni, 'UI-Buildtime', 'Menu[2][4]', ''), '\x7c', 3)
@@ -285,7 +283,7 @@ Func _Tree_GetTags()
 	Local $Split = StringSplit(IniRead($g_TRAIni, 'UI-Buildtime', 'Menu[2][1]', ''), '|'); => Special|All
 	$g_Tags[2][0]='*'
 	$g_Tags[2][1]=$Split[2]
-	If $g_Flags[14] = 'BWS' Then
+	If $g_Flags[14] = 'BWS' Or $g_Flags[14] = 'BG2EE' Then
 		$Split = StringSplit(IniRead($g_TRAIni, 'UI-Buildtime', 'Menu[2][2]', ''), '|'); => BWS themes
 	ElseIf $g_Flags[14] = 'BWP' Then
 		$Split = StringSplit(IniRead($g_TRAIni, 'UI-Buildtime', 'Menu[2][4]', ''), '|'); => BWP chapters
@@ -1005,7 +1003,7 @@ EndFunc   ;==>_Tree_Reload
 ; Take read selection-array and sort it theme-wise for the selection-screen
 ; ---------------------------------------------------------------------------------------------
 Func _Tree_SelectConvert($p_Array)
-	Local $Trans = StringSplit(IniRead($g_ProgDir & '\App-Translation-EN.ini', 'UI-Buildtime', 'Menu[2][2]', ''), '|'); => translations for themes
+	Local $Trans = StringSplit(IniRead($g_TRAIni, 'UI-Buildtime', 'Menu[2][2]', ''), '|'); => translations for themes
 	Dim $Theme[$Trans[0]]
 	For $a=1 to $p_Array[0][0]
 		$Theme[Number($p_Array[$a][8])]&='|'&$a; add index-numbers to a string that represents a theme
@@ -1107,7 +1105,7 @@ Func _Tree_SelectRead($p_Admin=0)
 	;FileWriteLine($g_LogFile, $g_Skip)
 	For $a=1 to $Array[0]
 		If StringRegExp($Array[$a], '\A(\s.*\z|\z)') Then ContinueLoop; skip empty lines
-		If StringRegExp($Array[$a], '(?i)\A(ANN|CMD|GRP)') Then
+		If StringRegExp($Array[$a], '(?i)\A(ANN|CMD|GRP|CMT|PAUSE)') Then
 			If $p_Admin=0 Then
 				ContinueLoop; skip annotations,commands,groups
 			Else

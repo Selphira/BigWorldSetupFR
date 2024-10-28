@@ -35,9 +35,9 @@ Func Au3BuildGUI($p_Num = 0)
 	;GUICtrlSetResizing(-1, 576)
 	;GUICtrlSetOnEvent(-1, '_Process_OnEvent')
     ;$g_UI_Button[0][4] = GUICtrlCreateButton('New Mod Install Tool - feedback request from Modders and Players', 30, 480, 700, 25, 0)
-	GUICtrlSetResizing(-1, 576)
-	GUICtrlSetOnEvent(-1, '_Process_OnEvent')
-    $g_UI_Button[0][4] = GUICtrlCreateButton('This application is now obsolete. Click this button to try new Mod Installer.', 30, 480, 700, 25, 0)
+	;GUICtrlSetResizing(-1, 576)
+	;GUICtrlSetOnEvent(-1, '_Process_OnEvent')
+    ;$g_UI_Button[0][4] = GUICtrlCreateButton('This application is now obsolete. Click this button to try new Mod Installer.', 30, 480, 700, 25, 0)
 	GUICtrlSetResizing(-1, 576)
     GUICtrlSetOnEvent(-1, '_Process_OnEvent')
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
@@ -81,19 +81,19 @@ Func Au3BuildGUI($p_Num = 0)
 	GUICtrlSetFont(-1, 8, 800, 0, 'MS Sans Serif')
 	$g_UI_Static[2][1] =  GUICtrlCreateLabel('', 30, 80, 370, 15); BG1 if BWS/BWP
 	$g_UI_Interact[2][1] = GUICtrlCreateInput('', 30, 95, 300, 20)
-	$g_UI_Button[2][1] = GUICtrlCreateButton(_GetTR($g_UI_Message, '0-B6'), 350, 95, 50, 20, 0)
+	$g_UI_Button[2][1] = GUICtrlCreateButton(_GetTR($g_UI_Message, '0-B6'), 340, 95, 70, 20, 0)
 	$g_UI_Static[2][2] =  GUICtrlCreateLabel('', 30, 135, 370, 15); BG2/IWD1/IWD2/PST/BG1EE/BG2EE
 	$g_UI_Interact[2][2] = GUICtrlCreateInput('', 30, 150, 300, 20)
-	$g_UI_Button[2][2] = GUICtrlCreateButton(_GetTR($g_UI_Message, '0-B6') , 350, 150, 50, 20, 0)
+	$g_UI_Button[2][2] = GUICtrlCreateButton(_GetTR($g_UI_Message, '0-B6') , 340, 150, 70, 20, 0)
 	$g_UI_Static[2][3] = GUICtrlCreateLabel('', 30, 190, 370, 15); download
 	$g_UI_Interact[2][3] = GUICtrlCreateInput($g_DownDir, 30, 205, 300, 20)
-	$g_UI_Button[2][3] = GUICtrlCreateButton(_GetTR($g_UI_Message, '0-B6'), 350, 205, 50, 20, 0)
+	$g_UI_Button[2][3] = GUICtrlCreateButton(_GetTR($g_UI_Message, '0-B6'), 340, 205, 70, 20, 0)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 	$g_UI_Seperate[2][2] = GUICtrlCreateGroup('', 15, 270, 400, 140); selection
 	GUICtrlSetFont(-1, 8, 800, 0, 'MS Sans Serif')
 	$g_UI_Static[2][5] = GUICtrlCreateLabel('', 30, 290, 370, 15); language
 	$g_UI_Interact[2][5] = GUICtrlCreateInput('', 30, 305, 300, 20)
-	$g_UI_Button[2][4] = GUICtrlCreateButton(_GetTR($g_UI_Message, '0-B6'), 350, 305, 50, 20, 0)
+	$g_UI_Button[2][4] = GUICtrlCreateButton(_GetTR($g_UI_Message, '0-B6'), 340, 305, 70, 20, 0)
 	$g_UI_Static[2][4] = GUICtrlCreateLabel('', 30, 345, 370, 15); compilation / pre-selection menu
 	$g_UI_Interact[2][4] = GUICtrlCreateCombo('', 30, 360, 370, 20)
 	$g_UI_Button[2][5] = GUICtrlCreateButton(_GetTR($g_UI_Message, '0-B7'), 29, 385, 302, 20, 0); open mod/componentselection
@@ -117,7 +117,7 @@ Func Au3BuildGUI($p_Num = 0)
 	$g_UI_Static[3][5] = GUICtrlCreateLabel('', 230, 300, 170, 20, $SS_Center+$SS_CENTERIMAGE); test present
 	$g_UI_Button[3][5] = GUICtrlCreateButton('', 230, 320, 170, 20, 0)
 	$g_UI_Static[3][6] = GUICtrlCreateLabel('', 30, 355, 170, 20, $SS_Center+$SS_CENTERIMAGE); look for update
-	$g_UI_Button[3][6] = GUICtrlCreateButton('', 30, 375, 170, 20, 0)
+	$g_UI_Button[3][6] = GUICtrlCreateLabel('', 30, 375, 170, 20, $SS_Center+$SS_CENTERIMAGE)
 	$g_UI_Static[3][7] = GUICtrlCreateLabel('', 230, 355, 170, 20, $SS_Center+$SS_CENTERIMAGE); list links
 	$g_UI_Button[3][7] = GUICtrlCreateButton('', 230, 375, 170, 20, 0)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
@@ -479,7 +479,7 @@ Func Au3BuildGUI($p_Num = 0)
 	$g_UI_Interact[14][4] = GUICtrlCreateCheckbox('', 30, 190, 370, 20); install in groups
 	$g_UI_Interact[14][10] = GUICtrlCreateCheckbox('', 30, 220, 370, 20); signal pauses
 	GUICtrlCreateGroup('', -99, -99, 1, 1)
-	$g_UI_Seperate[14][2] = GUICtrlCreateGroup('', 15, 270, 400, 140)
+	;$g_UI_Seperate[14][2] = GUICtrlCreateGroup('', 15, 270, 400, 140)
 	GUICtrlSetFont(-1, 8, 800, 0, "MS Sans Serif")
 	$g_UI_Interact[14][5] = GUICtrlCreateCheckbox('', 30, 305, 370, 20); use widescreen
 	$g_UI_Interact[14][6] = GUICtrlCreateInput('', 30, 345, 170, 20, $SS_CENTER)
@@ -586,12 +586,12 @@ Func Au3BuildGUI($p_Num = 0)
 	$g_UI_Menu[1][0] = GUICtrlCreateContextMenu($g_UI_Static[4][2]); >> option-menu
 	$g_UI_Menu[1][6] = GUICtrlCreateMenu('6', $g_UI_Menu[1][0]); Click properties
 	$g_UI_Menu[1][12] = GUICtrlCreateMenu('12', $g_UI_Menu[1][0]); View
-	$g_UI_Menu[1][13] = GUICtrlCreateMenu('13', $g_UI_Menu[1][0]); Tools
+	;$g_UI_Menu[1][13] = GUICtrlCreateMenu('13', $g_UI_Menu[1][0]); Tools
 	GUICtrlCreateMenuItem('', $g_UI_Menu[1][0])
 	$g_UI_Menu[1][1] = GUICtrlCreateMenuItem('1', $g_UI_Menu[1][0]); Load
 	$g_UI_Menu[1][2] = GUICtrlCreateMenuItem('2', $g_UI_Menu[1][0]); Save
-	$g_UI_Menu[1][3] = GUICtrlCreateMenuItem('3', $g_UI_Menu[1][0]); Import
 	$g_UI_Menu[1][4] = GUICtrlCreateMenuItem('4', $g_UI_Menu[1][0]); Export
+	$g_UI_Menu[1][3] = GUICtrlCreateMenuItem('3', $g_UI_Menu[1][0]); Import
 	$g_UI_Menu[1][11] = GUICtrlCreateMenuItem('11', $g_UI_Menu[1][0]); Import WeiDU
 ; Creating sub-menuitems for click-properties
 	$g_UI_Menu[1][7] = GUICtrlCreateMenuItem('7', $g_UI_Menu[1][6]); recommended
@@ -603,10 +603,10 @@ Func Au3BuildGUI($p_Num = 0)
 	$g_UI_Menu[1][5] = GUICtrlCreateMenuItem('5', $g_UI_Menu[1][12]); Extend
 	$g_UI_Menu[1][16] = GUICtrlCreateMenuItem('16', $g_UI_Menu[1][12]); pdf-sorting
 ; Creating sub-menuitems for tools-menu
-	$g_UI_Menu[1][14] = GUICtrlCreateMenuItem('14', $g_UI_Menu[1][13]); administrate mods
-	$g_UI_Menu[1][15] = GUICtrlCreateMenuItem('15', $g_UI_Menu[1][13]); administrate components
-	$g_UI_Menu[1][17] = GUICtrlCreateMenuItem('17', $g_UI_Menu[1][13]); administrate selection
-	$g_UI_Menu[1][18] = GUICtrlCreateMenuItem('18', $g_UI_Menu[1][13]); administrate dependencies
+	;$g_UI_Menu[1][14] = GUICtrlCreateMenuItem('14', $g_UI_Menu[1][13]); administrate mods
+	;$g_UI_Menu[1][15] = GUICtrlCreateMenuItem('15', $g_UI_Menu[1][13]); administrate components
+	;$g_UI_Menu[1][17] = GUICtrlCreateMenuItem('17', $g_UI_Menu[1][13]); administrate selection
+	;$g_UI_Menu[1][18] = GUICtrlCreateMenuItem('18', $g_UI_Menu[1][13]); administrate dependencies
 ; Creating basic add/remove/mark-entries
 	For $m=2 to 4
 		$g_UI_Menu[$m][0] = GUICtrlCreateContextMenu($g_UI_Static[4][$m+1]); context-menu

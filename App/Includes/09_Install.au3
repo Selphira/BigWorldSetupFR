@@ -193,10 +193,6 @@ Func Au3RunFix($p_Num = 0)
 ; ---------------------------------------------------------------------------------------------
 ; run textharmonisation if wanted
 ; ---------------------------------------------------------------------------------------------
-		If $g_MLang[1] = 'GE' And IniRead($g_UsrIni, 'Options', 'TAPatch', 1) = 1 Then
-			_Process_Run('xcopy /Y /S /E ".\Big World Textpack GERMAN\_Textharmonisation" ".\Big World Textpack GERMAN"', 'xcopy.exe')
-			If Not StringInStr(FileRead($g_BG2Dir&'\WeiDU.log'), 'Textharmonisation.TP2') Then _Install_CreateTP2Entry('Textharmonisation', IniRead($g_MODIni, 'BWTextpack', 'GE-AddSave', ''))
-		EndIf
 		;If Not StringInStr(FileRead($g_BG2Dir&'\WeiDU.log'), 'BWTrimpack.TP2') Then _Install_CreateTP2Entry('BWTrimpack', IniRead($g_MODIni, 'BWTrimpack', 'Save', 'Unknown'))
 		If Not StringInStr(FileRead($g_BG2Dir&'\WeiDU.log'), 'BWInstallpack.TP2') Then _Install_CreateTP2Entry('BWInstallpack', IniRead($g_MODIni, 'BWInstallpack', 'Save', 'Unknown'))
 		If _Install_PatchTest() = 0 Then
@@ -280,7 +276,7 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 	Local $TMessage = IniReadSection($g_TRAIni, 'IN-Test')
 	Local $Message = IniReadSection($g_TRAIni, 'IN-Au3Install')
 	$g_LogFile = $g_LogDir & '\BWS-Debug-Installation.log'
-	Local $Group = '-1', $CurrentMod, $Setup[10], $Type=StringRegExpReplace($g_Flags[14], '(?i)BWS|BWP', 'BG2')
+	Local $Group = '-1', $CurrentMod, $Setup[11], $Type=StringRegExpReplace($g_Flags[14], '(?i)BWS|BWP', 'BG2')
 	Local $Logic = IniRead($g_UsrIni, 'Options', 'Logic3', 1), $Ref=FileGetSize($g_GameDir&'\WeiDU\WeiDU.exe')
 	Local $EET_Mods
 	If $g_Flags[21] <> '' Then $EET_Mods=$g_Flags[20+StringRegExpReplace($g_Flags[14],  '(?i)\ABG|EE\z', '')]
@@ -313,6 +309,25 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 			ExitLoop; additional code for EET transition follows end of loop below
 		ElseIf StringRegExp($Array[$a], '(?i)\A(DWN|ANN)') Then; skip comments and download-only mods
 			ContinueLoop
+		ElseIf StringRegExp($Array[$a], '(?i)\ACMT') Then ; Commentaire si le mod est sélectionné
+			$Split=StringSplit($Array[$a], ';')
+			If $Split[0] < 3 Then
+				_Process_SetConsoleLog('WARNING:  BWS is skipping an incorrectly formatted line '&$a&' in '&$g_GConfDir&'\InstallOrder.ini'&': '&$Array[$a])
+				ContinueLoop
+			EndIf
+			If IniRead($g_UsrIni, 'Current', $Split[2], '') = '' Then ContinueLoop; the user did not select the mod at all
+			$Split[3] = StringReplace($Split[3], '%UserProfile%', @MyDocumentsDir)
+            _Process_SetConsoleLog($Split[3]);
+            ContinueLoop
+		ElseIf StringRegExp($Array[$a], '(?i)\APAUSE') Then
+			$Split=StringSplit($Array[$a], ';')
+			If UBound($Split)>2 Then; only look for requirement if line has enough semicolons
+                If $Split[2] <> '' Then; skip if requirements are not met. No feedback - it's just a cmd like copy/del.
+					If IniRead($g_UsrIni, 'Current', $Split[2], '') = '' Then ContinueLoop; the user did not select the mod at all
+                EndIf
+            EndIf
+			_Process_Pause(); force pause
+			ContinueLoop
 		ElseIf StringRegExp($Array[$a], '(?i)\ACMD') Then
 			$Split=StringReplace($Array[$a], "\;", "&SEMI&") ; allow backslash to escape a semicolon in CMD statements
 			$Split=StringSplit($Split, ';')
@@ -325,16 +340,16 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 			EndIf
 			FileDelete($g_GameDir&'\BWS_Finished.nul')
 			GUICtrlSetData($g_UI_Static[6][2], _GetTR($Message, 'L7')); => run batch
-			$Handle = FileOpen($g_GameDir & '\Tmp.bat', 2); yeah, this looks stupid, but how else would I know that the action is done?
+			$Handle = FileOpen($g_GameDir & '\BWS-FR.bat', 2); yeah, this looks stupid, but how else would I know that the action is done?
 			;FileWriteLine($Handle, '@echo off'); be quiet
 			FileWriteLine($Handle, $Split[2]); >> Do not comment if not debugging!!!
 			FileWriteLine($Handle, 'copy "BWS_Dummy.nul" "BWS_Finished.nul" 2>nul 1>nul'); be a little more quiet
 			FileClose($Handle)
 			If Not StringRegExp($Array[$a], '(?i)\s(Call|For|xcopy)\s|_IDS') Then; just avoid some annoying and useless linefeeds
 				_Process_SetConsoleLog($Split[2])
-				ShellExecuteWait('Tmp.bat', '', $g_GameDir, '', @SW_HIDE)
+				ShellExecuteWait('BWS-FR.bat', '', $g_GameDir, '', @SW_HIDE)
 			Else
-				_Process_Run('Tmp.bat', 'BWS_Finished.nul')
+				_Process_Run('BWS-FR.bat', 'BWS_Finished.nul')
 			EndIf
 		ElseIf StringRegExp($Array[$a], '(?i)\AGRP;Start') Then
 			IniWrite($g_BWSIni, 'Options', 'Start', $a); create entry to enable resume (start of a group)
@@ -347,6 +362,8 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 			EndIf
 			$Group = StringTrimLeft($Group, 1)
 			$Setup[0]='Setup-'&$Setup[2]&'.exe'
+			$Setup[5]=_GetTra($Setup[2], 'S')
+			$Setup[7]=IniRead($g_MODIni, $Setup[2], 'Name', $Setup[2]); Modname
 			$InstallString=$Setup[0]&' --no-exit-pause --noautoupdate --language '&StringTrimLeft($Setup[5], 3) &' --skip-at-view '&$g_WeiDUQuickLog&' --force-install-list '&$Group&' --logapp'
 			_Install_ManageDebug($Setup[2], 1); clean old debug log
 			_Install_UpdateWeiDU($Setup[0], $Ref); if needed, create or update WeiDU executable for this mod
@@ -395,12 +412,17 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 			; $Split[4] => theme (not needed here)
 			; $Split[5] => defaults (not needed here)
 			$Setup[6]=$Split[6]; $CompReq
+			If $Setup[2] = 'eefixpack-bg2' Then
+				$Setup[10] = 'eefixpack'
+			Else
+				$Setup[10] = $Setup[2]
+			EndIf
 			If $CurrentMod <> $Setup[2] Then; same mod > no update
-				$Setup[5]=_GetTra($Setup[2], 'S')
-				$Setup[7]=IniRead($g_MODIni, $Setup[2], 'Name', $Setup[2]); Modname
 				If $EET_Mods <> '' And StringRegExp($EET_Mods, '(?i)(\A|\x7c)'&$Setup[2]&'(\z|\x7c)') = 0 Then ContinueLoop; this mod should not be installed now
 				If IniRead($g_UsrIni, 'Current', $Setup[2], '') = '' Then ContinueLoop; the user did not select the mod at all
-				$Setup[9]=_Test_GetCustomTP2($Setup[2])
+				$Setup[5]=_GetTra($Setup[2], 'S')
+				$Setup[7]=IniRead($g_MODIni, $Setup[2], 'Name', $Setup[2]); Modname
+				$Setup[9]=_Test_GetCustomTP2($Setup[10])
 				$Error=@error
 				_Process_SetConsoleLog(@CRLF&@CRLF&'##### ' & $Setup[7] & ' #####')
 				If $Error = 0 And FileExists($Setup[9]) Then
@@ -426,8 +448,8 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 						ContinueLoop
 					EndIf
 					_Process_SetConsoleLog(_GetTR($Message, 'L17'), -1); => make sure mod exists
-					_Process_Question('r|c|e', _GetTR($TMessage, 'L6'), _GetTR($TMessage, 'Q1'), 3, $g_Flags[18]); => install anyway/skip/exit?
-					If $g_pQuestion = 'e' Then; exit
+					_Process_Question('r|c|q', _GetTR($TMessage, 'L6'), _GetTR($TMessage, 'Q1'), 3, $g_Flags[18]); => install anyway/skip/exit?
+					If $g_pQuestion = 'q' Then; exit
 						Exit
 					ElseIf $g_pQuestion = 'c' Then; continue
 						If $Dependent[0][0] <> 0 Then
@@ -442,8 +464,8 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 						ContinueLoop
 					EndIf
 				EndIf
-				$CurrentMod = $Setup[2]
 			EndIf
+			$CurrentMod = $Setup[2]
 			$Setup[8] = IniRead($g_GConfDir&'\WeiDU-'&StringLeft($Setup[5],2)&'.ini', $Setup[2], '@' & $Setup[3], ''); component-description
 ; ---------------------------------------------------------------------------------------------
 ; skip for various reasons
@@ -466,23 +488,21 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 				$Group&=' '&$Setup[3]
 				ContinueLoop
 			EndIf
-			_Install_ManageDebug($Setup[2], 1); clean old debug
+			_Install_ManageDebug($Setup[10], 1); clean old debug
 			$Sub=_Install_BuildSubcmd($Setup[2], $Setup[3])
-			$Setup[0]='Setup-'&$Setup[2]&'.exe'
+			$Setup[0]='Setup-'&$Setup[10]&'.exe'
 			If $Sub = 0 Then
 				If $Setup[2] = 'BGT' Then; add bg1-param
 					$InstallString=$Setup[0]&' --no-exit-pause --noautoupdate --language '&StringTrimLeft($Setup[5], 3) &' --skip-at-view '&$g_WeiDUQuickLog&' --args-list ops "'&$g_BG1Dir&'" --force-install-list '&$Setup[3]&' --logapp'
-				ElseIf $Setup[2] = 'BGT-NPCSound' Then; hide the output
-					$InstallString=$Setup[0]&' --no-exit-pause --noautoupdate --language '&StringTrimLeft($Setup[5], 3) &' --skip-at-view '&$g_WeiDUQuickLog&' --force-install-list '&$Setup[3]&' --logapp 2>nul 1>nul'
 				ElseIf $Setup[2] = 'EET' Then; add bg1ee-param
-					$InstallString=$Setup[0]&' --no-exit-pause --noautoupdate --language '&StringTrimLeft($Setup[5], 3) &' --skip-at-view '&$g_WeiDUQuickLog&' --args-list p "'&$g_BG1EEDir&'" --force-install-list '&$Setup[3]&' --logapp'
-				Else
+                    $InstallString=$Setup[0]&' --no-exit-pause --noautoupdate --language '&StringTrimLeft($Setup[5], 3) &' --skip-at-view '&$g_WeiDUQuickLog&' --args-list p "'&$g_BG1EEDir&'" --force-install-list '&$Setup[3]&' --logapp'
+                Else
 					$InstallString=$Setup[0]&' --no-exit-pause --noautoupdate --language '&StringTrimLeft($Setup[5], 3) &' --skip-at-view '&$g_WeiDUQuickLog&' --force-install-list '&$Setup[3]&' --logapp'
 				EndIf
 			Else
 				$InstallString='type BWS_SUB.nul | '&$Setup[0]&' --no-exit-pause --noautoupdate --language '&StringTrimLeft($Setup[5], 3) &' --skip-at-view '&$g_WeiDUQuickLog&' --force-install-list '&$Setup[3]&' --logapp'
 			EndIf
-			_Install_ManageDebug($Setup[2], 1); clean old debug log
+			_Install_ManageDebug($Setup[10], 1); clean old debug log
 			_Install_UpdateWeiDU($Setup[0], $Ref); if needed, create or update WeiDU executable for this mod
 			_Install_SetPrompt($Setup[9], StringTrimLeft($Setup[5], 3)); adjust keywords for debugging-output
 			GUICtrlSetData($g_UI_Static[6][2], _GetTR($Message, 'L5') & ' ' & $Setup[8] & ' (' & $Setup[7]&')'); => installing
@@ -490,11 +510,11 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 			If $Success = 0 Then
 				If StringRegExp($Logic, '5') = 0 Then; errors should be displayed
 					_Process_SetConsoleLog(_GetTR($Message, 'L15'), -1); => try to start cmd again?
-					_Process_Question('r|c|e', _GetTR($TMessage, 'L6'), _GetTR($TMessage, 'Q1'), 3, $g_Flags[18]); => retry/continue (skip)/exit?
+					_Process_Question('r|c|q', _GetTR($TMessage, 'L6'), _GetTR($TMessage, 'Q1'), 3, $g_Flags[18]); => retry/continue (skip)/exit?
 				Else
 					$g_pQuestion = 'r'; set answer to retry if user chose not to be prompted
 				EndIf
-				If $g_pQuestion = 'e' Then; exit
+				If $g_pQuestion = 'q' Then; exit
 					Exit
 				ElseIf $g_pQuestion = 'c' Then; continue
 					ContinueLoop
@@ -506,9 +526,9 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 					EndIf
 				EndIf
 			EndIf
-			$DebugTest=_Install_ReadDebug($Setup[2])
+			$DebugTest=_Install_ReadDebug($Setup[10])
 			$a-=_Install_TestInstalled($Setup, $DebugTest, $Logic, 1, $TMessage)
-			_Install_ManageDebug($Setup[2], 2); merge debug-files
+			_Install_ManageDebug($Setup[10], 2); merge debug-files
 			If $Type = 'BG2' Then _Install_RepairIDS()
 			Sleep(1000)
 		EndIf
@@ -619,44 +639,6 @@ EndFunc   ;==>_Install_BatchRun
 ; install the textpatches if needed
 ; ---------------------------------------------------------------------------------------------
 Func _Install_BG1Textpatch($p_Message)
-	$Success = _Test_CheckBG1TP(); German textpack
-	If $Success <> 1 Then
-		GUICtrlSetData($g_UI_Static[6][2], _GetTR($p_Message, 'L4')); => install TP
-		_Process_ChangeDir($g_BG1Dir, 1)
-		FileCopy($g_BG2Dir&'\WeiDU\WeiDU.exe', $g_BG1Dir&'\Setup-bg1tp.exe', 1)
-		If $Success = -1 Then
-			_Process_Run('Setup-BG1TP.exe --force-uninstall-list 0', 'Setup-bg1tp.exe')
-			If StringInStr(FileRead($g_BG1Dir&'\WeiDU.log'), @LF&'~bg1tp') Then
-				_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L6'), 1, _GetTR($p_Message, 'B1')); => cannot remove old TP
-				Exit
-			EndIf
-			If FileExists($g_BG1Dir&'\Setup-bg1tp.tp2') And FileDelete($g_BG1Dir&'\Setup-bg1tp.tp2') = 0 Then; remove old tp2, else the old version is installed again
-				_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L6'), 1, _GetTR($p_Message, 'B1')); => cannot remove old TP
-				Exit
-			EndIf
-		EndIf
-		_Process_Run('Setup-BG1TP.exe --no-exit-pause --noautoupdate --language 0 --skip-at-view --force-install-list 0', 'Setup-bg1tp.exe')
-		If Not StringInStr(FileRead($g_BG1Dir&'\WeiDU.log'), @LF&'~bg1tp') Then
-			_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L1'), 1, _GetTR($p_Message, 'B1')); => cannot install new TP
-			Exit
-		EndIf
-		_Process_ChangeDir($g_BG2Dir, 1)
-	EndIf
-; ---------------------------------------------------------------------------------------------
-; install the Spanish textpatch if needed
-; ---------------------------------------------------------------------------------------------
-	If $g_MLang[1] = 'SP' And Not StringInStr(FileRead($g_BG1Dir&'\WeiDU.log'), @LF&'~setup-Abra.tp2') And $g_BG1Dir <> '-' Then; first installation
-		GUICtrlSetData($g_UI_Static[6][2], _GetTR($p_Message, 'L4')); => install abra
-		_FileReplace($g_BG1Dir & '\Setup-Abra.tp2', 'AT_INTERACTIVE_EXIT ~VIEW Abra\Readme.htm~', '//AT_INTERACTIVE_EXIT ~VIEW Abra\Readme.htm~'); don't show the readme
-		_Process_ChangeDir($g_BG1Dir, 1)
-		FileCopy($g_BG2Dir&'\WeiDU\WeiDU.exe', $g_BG1Dir&'\Setup-Abra.exe', 1)
-		_Process_Run('Setup-Abra.exe --no-exit-pause --noautoupdate --language 0 --skip-at-view --force-install-list 0 1', 'Setup-Abra.exe')
-		If Not StringInStr(FileRead($g_BG1Dir&'\WeiDU.log'), @LF&'~setup-Abra.tp2') Then
-			_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L1'), 1, _GetTR($p_Message, 'B1')); => cannot install abra
-			Exit
-		EndIf
-		_Process_ChangeDir($g_BG2Dir, 1)
-	EndIf
 ; ---------------------------------------------------------------------------------------------
 ; install the French textpatch if needed
 ; ---------------------------------------------------------------------------------------------
@@ -667,37 +649,6 @@ Func _Install_BG1Textpatch($p_Message)
 		_Process_Run('Setup-correcfrbg1.exe --no-exit-pause --noautoupdate --language 0 --skip-at-view --force-install-list 0 1', 'Setup-correcfrbg1.exe')
 		If Not StringInStr(FileRead($g_BG1Dir&'\WeiDU.log'), @LF&'~correcfrbg1/correcfrbg1.tp2') Then
 			_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L1'), 1, _GetTR($p_Message, 'B1')); => cannot install correcfrbg
-			Exit
-		EndIf
-		_Process_ChangeDir($g_BG2Dir, 1)
-	EndIf
-; ---------------------------------------------------------------------------------------------
-; install the Polish BG1 characters conversion if needed
-; ---------------------------------------------------------------------------------------------
-	If $g_MLang[1] = 'PO' And FileGetSize($g_BG1Dir&'\DialogF.tlk') = '3430385' And Not FileExists($g_BG1Dir&'\Dialog.bak') And $g_BG1Dir <> '-' Then; first installation
-		GUICtrlSetData($g_UI_Static[6][2], _GetTR($p_Message, 'L4')); => install textpatch
-		_Process_ChangeDir($g_BG1Dir, 1)
-		FileCopy($g_BG2Dir&'\BGT\kpzbg1.exe', $g_BG1Dir&'\kpzbg1.exe', 1)
-		$Handle=FileOpen($g_BG1Dir&'\kpzbg1.txt', 2)
-		FileWrite($Handle, 3&@CRLF&1&@CRLF)
-		FileClose($Handle)
-		_Process_Run('type kpzbg1.txt|kpzbg1.exe', 'kpzbg1.exe')
-		If Not StringInStr($g_ConsoleOutput, 'Operacja sie powiodla.') Then
-			_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L1'), 1, _GetTR($p_Message, 'B1')); => cannot install textpatch
-			Exit
-		EndIf
-		_Process_ChangeDir($g_BG2Dir, 1)
-	EndIf
-; ---------------------------------------------------------------------------------------------
-; install the Russian textpatch if needed
-; ---------------------------------------------------------------------------------------------
-	If $g_MLang[1] = 'RU' And Not StringInStr(FileRead($g_BG1Dir&'\WeiDU.log'), @LF&'~bg1textpack/setup-bg1textpack.tp2') And $g_BG1Dir <> '-' Then; first installation
-		GUICtrlSetData($g_UI_Static[6][2], _GetTR($p_Message, 'L4')); => install textpatch
-		_Process_ChangeDir($g_BG1Dir, 1)
-		FileCopy($g_BG1Dir&'\dialog.tlk', $g_BG1Dir&'\dialogf.tlk', 1)
-		_Process_Run('setup-bg1textpack.exe --no-exit-pause --noautoupdate --language 0 --skip-at-view --force-install-list 1', 'setup-bg1textpack.exe')
-		If Not StringInStr(FileRead($g_BG1Dir&'\WeiDU.log'), @LF&'~bg1textpack/setup-bg1textpack.tp2') Then
-			_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L1'), 1, _GetTR($p_Message, 'B1')); => cannot install bg1textpack
 			Exit
 		EndIf
 		_Process_ChangeDir($g_BG2Dir, 1)
@@ -859,7 +810,7 @@ Func _Install_CompressLog()
 	Next
 	FileClose($Handle)
 	$7za = $g_ProgDir & '\Tools\7z.exe'
-	$Handle = Run('"' & $7za & '" a "' & $g_GameDir & '\BWS-Debug.7z" "' & $g_LogDir & '\BWS-Debug.log"', $g_ProgDir, @SW_HIDE, 8)
+	$Handle = Run('"' & $7za & '" a "' & $g_GameDir & '\BWS-FR-Debug.7z" "' & $g_LogDir & '\BWS-Debug.log"', $g_ProgDir, @SW_HIDE, 8)
 	Local $Return
 	While 1
 		$Return &= StdoutRead($Handle)
@@ -1119,7 +1070,7 @@ Func _Install_ModifyForGroupInstall($p_Array, $p_Debug=0)
 			WEnd
 		Else
 			$Split=StringSplit($p_Array[$a+1], ';')
-			If $Open = 0 And $Mod=$Split[2] Then ; Only open a group if setup lasts longer then 2 components
+			If $Open = 0 And $Mod=$Split[2] And $Mod <> 'EET' Then ; Only open a group if setup lasts longer then 2 components
 				$NArray[$n]='GRP;Start'
 				$Open=1
 				$n+=1
@@ -1295,7 +1246,7 @@ Func _Install_TestInstalled($p_Setup, $p_DebugTest, $p_Logic, $p_Num, $p_Message
 	Else
 		Local $Message = $p_Message
 	EndIf
-	$WeiDUTest=_Install_ReadWeiDU($p_Setup[2], $p_Setup[3]); do the testing, warnings and stuff there
+	$WeiDUTest=_Install_ReadWeiDU($p_Setup[10], $p_Setup[3]); do the testing, warnings and stuff there
 	If $p_Num > $p_DebugTest[0][0] Then
 		ReDim $p_DebugTest[$p_Num+1][3]
 		$p_DebugTest[$p_Num][0] = 0
@@ -1354,8 +1305,8 @@ Func _Install_TestInstalled($p_Setup, $p_DebugTest, $p_Logic, $p_Num, $p_Message
 			EndIf
 			If StringRegExp($p_Logic, '1|2|4') Then; errors should be displayed
 				_Process_SetConsoleLog('|'&_GetTR($Message, 'L5'), -1); => want to fix it?
-				_Process_Question('r|c|e', _GetTR($Message, 'L6'), _GetTR($Message, 'Q1'), 3, $g_Flags[18]); => retry/continue/exit
-				If $g_pQuestion = 'e' Then
+				_Process_Question('r|c|q', _GetTR($Message, 'L6'), _GetTR($Message, 'Q1'), 3, $g_Flags[18]); => retry/continue/exit
+				If $g_pQuestion = 'q' Then
 					Exit
 				ElseIf $g_pQuestion = 'r' Then
 					Return 1; decrease number for retry
@@ -1449,7 +1400,7 @@ Func _Install_ReadWeiDU($p_Setup, $p_Comp='*', $p_Lang='*')
 	If $p_Comp = '*' Then $p_Comp = '.*'
 	$Array = StringSplit(StringStripCR(FileRead($g_GameDir & '\WeiDU.log')), @LF)
 	For $a = $Array[0] To 1 Step -1
-		If StringRegExp($Array[$a], '(?i)\A~([^\x2f]{1,}\x2f|)(setup\x2d|)'&$p_Setup&'.tp2~\s#'&$p_Lang&'\s#'&$p_Comp) Then
+		If StringRegExp($Array[$a], '(?i)\A~([^\x2f]{1,}\x2f|)(setup\x2d|)'&$p_Setup&'.tp2~\s#'&$p_Lang&'\s#'&$p_Comp&'\s') Then
 			$Component = StringRegExpReplace($Array[$a], '\A.*\s//\s', '')
 			Return SetError(0, '', 1)
 			ExitLoop
@@ -1464,6 +1415,10 @@ EndFunc   ;==>_Install_ReadWeiDU
 Func _Install_UpdateWeiDU($p_File, $p_Size=0)
 	If $p_Size = 0 Then $p_Size=FileGetSize($g_GameDir&'\WeiDU\WeiDU.exe')
 	If $p_Size = 0 Then Return; do nothing if WeiDU.exe does not exist
+	; generalized biffing est buggé en version 247, la version 246 doit être utilisée
+	If StringRegExp($p_File, '(?i)generalized_biffing') Then
+	    Return
+	EndIf
 	$Size=FileGetSize($g_GameDir&'\'&$p_File); get size of target WeiDU-setup exe for comparison
 	If $Size <> $p_Size Then; create or replace the WeiDU-setup exe if it doesn't match reference size
 		FileCopy($g_GameDir&'\WeiDU\WeiDU.exe', $g_GameDir&'\'&$p_File, 1)

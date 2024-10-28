@@ -60,7 +60,17 @@ Func Au3Extract($p_Num = 0)
 					If StringInStr($DirList[$n], 'Everything is Ok') Then
 						$Dir = StringRegExpReplace($DirList[$n - 2], '(?i)extracting\s*|\x5c.*', ''); stripped 7z info and everything after a potential backslash
 						$IsDir = FileGetAttrib($g_GameDir & '\' & $Dir); get the attrib of this file or directory
-						If StringInStr($IsDir, 'D') Then $TP2Exists = _Test_GetCustomTP2($g_CurrentPackages[$e][0], '\'&$Dir&'\', 1); 1 = don't complain if BACKUP mod folder is not found
+						If StringInStr($IsDir, 'D') Then
+							$RenameFolderTo = _IniRead($ReadSection, 'RenameFolderTo', '')
+							If $RenameFolderTo <> '' Then
+								FileWrite($g_LogFile, '> Rename ' & $Dir & ' to ' & $RenameFolderTo & @CRLF)
+								DirMove($g_GameDir & '\' & $Dir , $g_GameDir & '\' & $RenameFolderTo, 0)
+								$TP2Exists = _Test_GetCustomTP2($g_CurrentPackages[$e][0], '\', 1); 1 = don't complain if BACKUP mod folder is not found
+								If $TP2Exists <> '0' Then ContinueLoop 2
+								$Dir = $RenameFolderTo
+							EndIf
+							$TP2Exists = _Test_GetCustomTP2($g_CurrentPackages[$e][0], '\'&$Dir&'\', 1); 1 = don't complain if BACKUP mod folder is not found
+						EndIf
 						ExitLoop
 					EndIf
 				Next
@@ -209,6 +219,11 @@ Func Au3ExFix($p_Num)
 		EndIf
 	EndIf
 ; ================         move files from sub-directories to main     ================
+	If FileExists($g_GameDir&'\WeiDU-Windows') Then
+		FileWrite($g_LogFile, '>WeiDU-Windows\* .' & @CRLF)
+		;DirMove($g_GameDir & '\WeiDU-Windows' , $g_GameDir & '\WeiDU', 0)
+		FileMove($g_GameDir & '\WeiDU-Windows\*.exe' , $g_GameDir & '\WeiDU', 1)
+	EndIf
 	If StringRegExp($g_Flags[14], 'BWP|BWS') And FileExists($g_GameDir&'\A4Auror') Then
 		FileWrite($g_LogFile, '>A4Auror\* .' & @CRLF)
 		FileMove($g_BG2Dir&'\A4Auror\Setup-A4Auror.exe', $g_BG2Dir&'\Setup-A4Auror.exe')
@@ -239,17 +254,30 @@ Func Au3ExFix($p_Num)
 		FileWrite($g_LogFile, '>Big-World-Fixpack-master\* .' & @CRLF)
 		_Extract_MoveMod('Big-World-Fixpack-master')
 	EndIf
-	If StringRegExp($g_Flags[14], 'BWP|BWS|BG1EE|BG2EE|PSTEE') And FileExists($g_GameDir&'\BWS-EE-Fixpack-master') Then
-		FileWrite($g_LogFile, '>BWS-EE-Fixpack-master\* .' & @CRLF)
-		_Extract_MoveMod('BWS-EE-Fixpack-master')
-	EndIf
-	If StringRegExp($g_Flags[14], 'BG1EE|BG2EE') And FileExists($g_GameDir&'\MSFM WeiDU Install v1.35') Then
-		FileWrite($g_LogFile, '>MSFM WeiDU Install v1.35\* .' & @CRLF)
-		_Extract_MoveMod('MSFM WeiDU Install v1.35')
-	EndIf
-	If StringRegExp($g_Flags[14], 'BWP|BWS') And FileExists($g_GameDir&'\SandrahToT-master') Then
-		FileWrite($g_LogFile, '>SandrahToT-master\* .' & @CRLF)
-		_Extract_MoveMod('SandrahToT-master')
+	If StringRegExp($g_Flags[14], 'BWP|BWS|BG1EE|BG2EE|PSTEE') And FileExists($g_GameDir&'\EE_Fixpack-master') Then
+        FileWrite($g_LogFile, '>EE_Fixpack-master\* .' & @CRLF)
+        _Extract_MoveMod('EE_Fixpack-master')
+    EndIf
+	If FileExists($g_GameDir&'\IWDSpells-master') Then
+        FileWrite($g_LogFile, '>IWDSpells-master\dw_iwdspells\iwdspells\* to iwdification\' & @CRLF)
+        DirCopy($g_GameDir & '\IWDSpells-master\dw_iwdspells\iwdspells' , $g_GameDir & '\iwdification\iwdspells', 1)
+        DirCopy($g_GameDir & '\IWDSpells-master\dw_iwdspells\sfo' , $g_GameDir & '\iwdification\sfo', 1)
+    EndIf
+	If FileExists($g_GameDir&'\Realistic NPC Portraits for BGEE') Then
+        FileWrite($g_LogFile, '>Realistic NPC Portraits for BGEE\Override\* .' & @CRLF)
+        _Extract_MoveModOverride('Realistic NPC Portraits for BGEE')
+    EndIf
+	If FileExists($g_GameDir&'\Realistic NPC Portraits for BG2EE') Then
+        FileWrite($g_LogFile, '>Realistic NPC Portraits for BG2EE\Override\* .' & @CRLF)
+        _Extract_MoveModOverride('Realistic NPC Portraits for BG2EE')
+    EndIf
+	If FileExists($g_GameDir&'\Additonal Pack for SoD') Then
+        FileWrite($g_LogFile, '>Additonal Pack for SoD\Override\* .' & @CRLF)
+        _Extract_MoveModOverride('Additonal Pack for SoD')
+    EndIf
+	If FileExists($g_GameDir&'\Setup-Sheena.TP2') Then
+		FileWrite($g_LogFile, '>Setup-Sheena.TP2 to Sheena\' & @CRLF)
+		FileMove($g_GameDir&'\Setup-Sheena.TP2', $g_GameDir&'\Sheena\Setup-Sheena.TP2')
 	EndIf
 ; ==============  Fix textstring so weidu will not fail to install the mod ============
 	If StringRegExp($g_Flags[14], 'BWP|BWS') And FileExists($g_BG2Dir&'\setup-bonehillv275.exe') Then
@@ -274,27 +302,6 @@ Func Au3ExFix($p_Num)
 			FileClose($Handle)
 		EndIf
 	EndIf
-; ==============      Fix keyword-test for _Test_GetModFolder-function     ============
-	If StringRegExp($g_Flags[14], 'BWP|BWS') And FileExists($g_BG2Dir&'\dsotsc\setup-dsotsc.tp2') Then
-		$Text=FileRead($g_BG2Dir&'\dsotsc\setup-dsotsc.tp2')
-		If StringInStr($Text, Chr(0)) Then
-			$Handle = FileOpen($g_BG2Dir&'\dsotsc\setup-dsotsc.tp2', 2) ; Open for overwriting
-			FileWrite($Handle, StringReplace($Text, Chr(0), ''))
-			FileClose($Handle)
-		EndIf
-	EndIf
-	If StringRegExp($g_Flags[14], 'BG[1-2]EE') Then
-		If FileExists($g_BG1EEDir&'\Helarine Mod') Then
-			FileWrite($g_LogFile, '>Helarine Mod\JklHel\* .' & @CRLF)
-			_Extract_MoveMod('Helarine Mod')
-;			FileMove($g_BG1EEDir&'\JklHel\Helarine_BGEE.tp2', $g_BG1EEDir&'\JklHel\JklHel.tp2') ; now renamed after BWFixpack
-		EndIf
-		If FileExists($g_BG1EEDir&'\setup-bpseries.exe') Then
-			If FileExists($g_BG1EEDir&'\WeiDU') And StringInStr(FileGetAttrib($g_BG1EEDir&'\WeiDU'), 'D') Then IniDelete($g_BWSIni, 'Faults', 'BPSeries')
-		EndIf
-		If FileExists($g_BG1EEDir&'\kitpack.tp2') Then DirCreate($g_BG1EEDir&'\kitpackbackup')
-		If FileExists($g_BG1EEDir&'\kitpack.tp2') Then DirCreate($g_BG1EEDir&'\SBACKUP')
-	EndIf
 ; ==============    create the mods folder so the tp2-test will not fail   ============
 	If StringRegExp($g_Flags[14], 'BWP|BWS|BG[1-2]EE') And FileExists($g_GameDir&'\stratagems') Then DirCreate($g_GameDir&'\stratagems_external')
 	If StringRegExp($g_Flags[14], 'BWP|BWS|BG2EE') And FileExists($g_GameDir&'\wheels') Then DirCreate($g_GameDir&'\stratagems_external')
@@ -304,10 +311,6 @@ Func Au3ExFix($p_Num)
 		If FileExists($g_BG2Dir&'\setup-iwditempack.exe') Then DirCreate($g_BG2Dir&'\iwditemfix')
 		If FileExists($g_BG2Dir&'\item_rev\item_rev.tp2') Then DirCreate($g_BG2Dir&'\item_rev_shatterfix')
 		If FileExists($g_BG2Dir&'\Setup-R*deur.tp2') Then DirMove($g_BG2Dir&"\RÓdeur de l'ombre", $g_BG2Dir&"\Rôdeur de l'ombre")
-		If FileExists($g_BG2Dir&'\SetupP!Bhaal.tp2') Then DirMove($g_BG2Dir&'\PrČtre de Bhaal', $g_BG2Dir&'\Prętre de Bhaal')
-		If FileExists($g_BG2Dir&'\setup-astscriptpatcher.exe') Then DirCreate($g_BG2Dir&'\astScriptPatcher')
-	ElseIf $g_Flags[14] = 'PST' Then
-		If FileExists($g_PSTDir&'\setup-pst-drawfix.exe') Then DirCreate($g_PSTDir&'\pst-drawfix_backup')
 	EndIf
 ; ---------------------------------------------------------------------------------------------
 ; Add missing archives (e.g. NSIS-extractions)
@@ -335,7 +338,6 @@ Func Au3ExFix($p_Num)
 	If Not @error Then
 		GUICtrlSetData($g_UI_Interact[6][1], 0)
 		For $f=1 to $Fault[0][0]
-			If $Fault[$f][0] = 'BG1TP' Then ContinueLoop; German bg1-addons
 			If $Fault[$f][0] = 'Abra' Or $Fault[$f][0] = 'BG1TotSCSound' Then ContinueLoop; Spanish bg1-addons
 			If $Fault[$f][0] = 'correcfrbg1' Then ContinueLoop; French bg1-addon
 			If $Fault[$f][0] = 'bg1textpack' Then ContinueLoop; Russian bg1-addon
@@ -735,7 +737,6 @@ Func _Extract_ListMissing()
 		EndIf
 		If $g_BG1Dir <> '-' Then; check for BG1 fixes
 			If $Fault[$f][0] = 'BG1TotSCSound' And _Test_CheckTotSCFiles_BG1() = 1 Then $Fault[$f][1]=''; extracted spanish bg1-sounds (bifs)
-			If $Fault[$f][0] = 'BG1TP' And FileExists($g_BG1Dir&'\setup-bg1tp.exe') Then $Fault[$f][1]=''; extracted German Textpatch
 			If $Fault[$f][0] = 'Abra' And FileExists($g_BG1Dir&'\setup-abra.exe') Then $Fault[$f][1]=''; extracted Spanish Textpatch
 			If $Fault[$f][0] = 'correcfrbg1' And FileExists($g_BG1Dir&'\setup-correcfrbg1.exe') Then $Fault[$f][1]=''; extracted French Textpatch
 			If $Fault[$f][0] = 'bg1textpack' And FileExists($g_BG1Dir&'\setup-bg1textpack.exe') Then $Fault[$f][1]=''; extracted Russian Textpatch
@@ -766,7 +767,7 @@ Func _Extract_ListMissing()
 				Local $mNum = 1, $Type = _GetTra($ReadSection, 'T') & '-AddSave', $Hint = _GetTR($Message, 'L4'); => translation
 				$Mark&=' ' & Chr(0xB2)
 			EndIf
-			If $Fault[$f][0] = 'BG1TP' Or $Fault[$f][0] = 'correcfrbg1' Or $Fault[$f][0] = 'Abra' Or $Fault[$f][0] = 'BG1TotSCSound' Or $Fault[$f][0] = 'bg1textpack' Then
+			If $Fault[$f][0] = 'correcfrbg1' Or $Fault[$f][0] = 'Abra' Or $Fault[$f][0] = 'BG1TotSCSound' Or $Fault[$f][0] = 'bg1textpack' Then
 				$oNum=1
 				$Mark&=' ' & Chr(0xB3)
 			EndIf
@@ -798,25 +799,9 @@ EndFunc    ;==>_Extract_ListMissing
 ; extract BG1TP and sounds to BG1 dir if the archive exists in the download-dir and it's not already installed
 ; ---------------------------------------------------------------------------------------------
 Func _Extract_MissingBG1()
-	If _Test_CheckTotSCFiles_BG1() = 0 Then; extract spanish bg1-sounds (bifs)
-		_Extract_CaseRemove('BG1TotSCSound', $g_BG1Dir&'\Data')
-		If _Test_CheckTotSCFiles_BG1() = 1 Then IniDelete($g_BWSIni, 'Faults', 'BG1TotSCSound')
-	EndIf
-	If _Test_CheckBG1TP() <> 1 Then; this one is the only (german) weidu that is extracted into the bg1-folder
-		_Extract_CaseRemove('BG1TP', $g_BG1Dir)
-		If FileExists($g_BG1Dir&'\setup-bg1tp.tp2') Then IniDelete($g_BWSIni, 'Faults', 'BG1TP')
-	EndIf
-	If Not StringInStr(FileRead($g_BG1Dir&'\Weidu.log'), @LF&'~setup-abra.tp2') And $g_MLang[1] = 'SP' Then; this one is the only (Spanish) weidu that is extracted into the bg1-folder
-		_Extract_CaseRemove('Abra', $g_BG1Dir)
-		If StringInStr(FileRead($g_BG1Dir&'\Weidu.log'), @LF&'~setup-abra.tp2') Then IniDelete($g_BWSIni, 'Faults', 'Abra')
-	EndIf
 	If Not StringInStr(FileRead($g_BG1Dir&'\Weidu.log'), @LF&'~correcfrbg1/correcfrbg1.tp2') And $g_MLang[1] = 'FR' Then; this one is the only (French) weidu that is extracted into the bg1-folder
 		_Extract_CaseRemove('correcfrbg1', $g_BG1Dir)
 		If StringInStr(FileRead($g_BG1Dir&'\Weidu.log'), @LF&'~correcfrbg1/correcfrbg1.tp2') Then IniDelete($g_BWSIni, 'Faults', 'correcfrbg1')
-	EndIf
-	If Not StringInStr(FileRead($g_BG1Dir&'\Weidu.log'), @LF&'~bg1textpack/setup-bg1textpack.tp2') And $g_MLang[1] = 'RU' Then; this one is the only (Russian) weidu that is extracted into the bg1-folder
-		_Extract_CaseRemove('bg1textpack', $g_BG1Dir)
-		If StringInStr(FileRead($g_BG1Dir&'\Weidu.log'), @LF&'~bg1textpack/setup-bg1textpack.tp2') Then IniDelete($g_BWSIni, 'Faults', 'bg1textpack')
 	EndIf
 EndFunc    ;==>_Extract_MissingBG1
 
@@ -859,6 +844,21 @@ Func _Extract_MoveModEx($p_Dir)
 	EndIf
 	Return $Success
 EndFunc   ;==>_Extract_MoveModEx
+
+Func _Extract_MoveModOverride($p_Dir)
+	Local $Success=0
+	$Files=_FileSearch($g_GameDir & '\' & $p_Dir & '\override', '*')
+	For $f=1 to $Files[0]
+		If StringInStr(FileGetAttrib($g_GameDir & '\' & $p_Dir & '\override\' & $Files[$f]), "D") Then
+			$Success = 1
+		Else
+			$Success = FileMove($g_GameDir & '\' & $p_Dir & '\override\' & $Files[$f], $g_GameDir & '\override\', 1)
+		EndIf
+		If $Success = 0 Then Return 0
+	Next
+	$Success = DirRemove($g_GameDir & '\' & $p_Dir, 1)
+	Return $Success
+EndFunc   ;==>_Extract_MoveModOverride
 
 ; ---------------------------------------------------------------------------------------------
 ; Little filetests for some content of addtional archives

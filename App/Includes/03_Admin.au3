@@ -1697,7 +1697,7 @@ Func _Select_Gui()
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Admin_SelectGui')
 	Local $Message = IniReadSection($g_TRAIni, 'Admin')
 	Local $OldMod, $ReadSection, $Switch
-	If $g_Flags[14] = 'BWS' Then; read different themes for BWS. BWP uses another method, so it can't be set here.
+	If $g_Flags[14] = 'BWS' Or $g_Flags[14] = 'BG2EE' Then; read different themes for BWS. BWP uses another method, so it can't be set here.
 		$Text='Menu[2][2]'
 	Else; any other mod beside the Big World Project
 		$Text='Menu[2][5]'

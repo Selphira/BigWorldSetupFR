@@ -58,13 +58,17 @@ Func Au3Select($p_Num = 0)
 		GUICtrlSetState($g_UI_Interact[14][6], $GUI_ENABLE)
 		GUICtrlSetState($g_UI_Interact[14][7], $GUI_ENABLE)
 		$WScreen = StringSplit(StringRegExpReplace($WScreen, '\A0\s|0\x3f\d_', ''), ' ')
+
+		Local $GuiWidth = 1280;
+		Local $GuiHeight = 720;
+
 		If IsArray($WScreen) And $WScreen[0] = 2 Then
-			GUICtrlSetData($g_UI_Interact[14][6], $WScreen[1])
-			GUICtrlSetData($g_UI_Interact[14][7], $WScreen[2])
-		Else
-			GUICtrlSetData($g_UI_Interact[14][6], @DesktopWidth)
-			GUICtrlSetData($g_UI_Interact[14][7], @DesktopHeight)
+			$GuiWidth = $WScreen[1];
+			$GuiHeight = $WScreen[2];
 		EndIf
+
+        GUICtrlSetData($g_UI_Interact[14][6], $GuiWidth)
+        GUICtrlSetData($g_UI_Interact[14][7], $GuiHeight)
 	EndIf
 ; ---------------------------------------------------------------------------------------------
 ; lift off
@@ -210,7 +214,7 @@ Func Au3Select($p_Num = 0)
 ; leaving folder selection
 ; ---------------------------------------------------------------------------------------------
 			ElseIf $Current = 2 Then
-				If _Tree_Populate_PreCheck() = 0 Then ContinueLoop
+				If _Tree_Populate_PreCheck() = 0 Then _Tree_GetCurrentSelection(0) ContinueLoop
 ; ---------------------------------------------------------------------------------------------
 ; backup / update menu
 ; ---------------------------------------------------------------------------------------------

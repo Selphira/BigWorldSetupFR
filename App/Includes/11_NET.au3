@@ -366,8 +366,8 @@ Func Au3NetFix($p_Num = 0)
 	If FileExists($g_GameDir&'\WeiDU') And Not StringInStr(FileGetAttrib($g_GameDir&'\WeiDU'), 'D') Then FileDelete($g_GameDir&'\WeiDU'); remove WeiDU for mac/linux (if it exists)
 	If FileExists($g_DownDir&'\WeiDU.exe') Then FileCopy($g_DownDir&'\WeiDU.exe', $g_GameDir&'\WeiDU\WeiDU.exe', 9); file will be overwritten if it's a beta, since that had to be extracted later
 	If FileExists($g_DownDir&'\WeiDU64.exe') Then FileCopy($g_DownDir&'\WeiDU64.exe', $g_GameDir&'\WeiDU\WeiDU.exe', 9); file will be overwritten if it's a beta, since that had to be extracted later
-	$ExtractOnlyMods=IniRead($g_GConfDir&'\Game.ini', 'Options', 'ExtractOnly', 'BWFixpack,BWTextpack,BWInstallpack,WeiDU,BeregostCF')
-	$DownloadOnlyMods=IniRead($g_GConfDir&'\Game.ini', 'Options', 'DownloadOnly', 'BG1TP,BWPDF')
+	$ExtractOnlyMods=IniRead($g_GConfDir&'\Game.ini', 'Options', 'ExtractOnly', 'BWFixpack,BWInstallpack,WeiDU,BeregostCF')
+	$DownloadOnlyMods=IniRead($g_GConfDir&'\Game.ini', 'Options', 'DownloadOnly', 'BWPDF')
 	For $c=1 to $g_CurrentPackages[0][0]
 		If StringRegExp($ExtractOnlyMods, '(?i)(\A|\x2c)'&$g_CurrentPackages[$c][0]&'(\z|\x2c)') Then; avoid file movements from Au3Extract (subdir-logic will move if no tp2 is found)
 			_Install_CreateTP2Entry($g_CurrentPackages[$c][0], IniRead($g_MODIni, $g_CurrentPackages[$c][0], 'Name', $g_CurrentPackages[$c][0]), 0)
@@ -573,7 +573,9 @@ Func _Net_DownloadStart($p_URL, $p_File, $p_Setup, $p_Prefix, $p_String); Link, 
 			IniWrite($g_ProgDir&'\Config\Global\'&$p_Setup&'.ini', 'Mod', $p_Prefix&'Save', $p_File)
 		EndIf
 		If $NetInfo[2] < 0 Then; server returned a 0-byte filesize or no info at all
-			If StringInStr($p_URL, 'master') Then; for Git master branch downloads, the file name does not change for new commits
+			;If StringInStr($p_URL, 'master') Then; for Git master branch downloads, the file name does not change for new commits
+			;TODO: Faire une exception pour le BWS-FR-Fixpack ?
+			If StringInStr($p_URL, 'check-temporarily-disabled-for-test') Then; for Git master branch downloads, the file name does not change for new commits
 				; we can't assume a local copy is still up to date if we didn't get a valid size, so ensure we do not use a local copy
 				If FileExists($g_DownDir & '\' & $p_File) Then
 					FileDelete($g_DownDir & '\' & $p_File); delete old copy of file to ensure we download a fresh copy
