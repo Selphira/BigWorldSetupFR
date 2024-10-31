@@ -585,10 +585,13 @@ Func _Extract_7z($p_File, $p_Dir, $p_String = ''); $a=archive; $b=outputdir; $c=
 		Return '1'
 	Else; something went wrong
 		ConsoleWrite('---------------------------' & @CRLF)
+		_Process_SetConsoleLog('---------------------------' & @CRLF)
+		_Process_SetConsoleLog($g_ConsoleOutput & @CRLF)
 		For $s=1 to $Summary[0]
 			ConsoleWrite('['&$s&'] '&  $Summary[$s] & @CRLF)
 		Next
 		ConsoleWrite('---------------------------' & @CRLF)
+		_Process_SetConsoleLog('---------------------------' & @CRLF)
 		_Process_SetConsoleLog(_GetTR($Message, 'E1') & @CRLF & '"' & $7za & '" x "' & $p_File & '" -aoa -o"' & $p_Dir & '"' & @CRLF & _GetTR($Message, 'E2') & @CRLF); => failed due to unknown reasons
 		ConsoleWrite(_GetTR($Message, 'E1') & @CRLF & '"' & $7za & '" x "' & $p_File & '" -aoa -o"' & $p_Dir & '"' & @CRLF & _GetTR($Message, 'E2') & @CRLF); => failed due to unknown reasons
 		GUICtrlSetColor($g_UI_Interact[6][3], 0xff0000); paint the item red
