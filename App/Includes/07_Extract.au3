@@ -263,17 +263,13 @@ Func Au3ExFix($p_Num)
         DirCopy($g_GameDir & '\IWDSpells-master\dw_iwdspells\iwdspells' , $g_GameDir & '\iwdification\iwdspells', 1)
         DirCopy($g_GameDir & '\IWDSpells-master\dw_iwdspells\sfo' , $g_GameDir & '\iwdification\sfo', 1)
     EndIf
-	If FileExists($g_GameDir&'\Realistic NPC Portraits for BGEE') Then
-        FileWrite($g_LogFile, '>Realistic NPC Portraits for BGEE\Override\* .' & @CRLF)
-        _Extract_MoveModOverride('Realistic NPC Portraits for BGEE')
+	If FileExists($g_GameDir&'\Realistic Portraits for BGEE') Then
+        FileWrite($g_LogFile, '>Realistic Portraits for BGEE\Override\* .' & @CRLF)
+        _Extract_MoveModOverride('Realistic Portraits for BGEE')
     EndIf
-	If FileExists($g_GameDir&'\Realistic NPC Portraits for BG2EE') Then
-        FileWrite($g_LogFile, '>Realistic NPC Portraits for BG2EE\Override\* .' & @CRLF)
-        _Extract_MoveModOverride('Realistic NPC Portraits for BG2EE')
-    EndIf
-	If FileExists($g_GameDir&'\Additonal Pack for SoD') Then
-        FileWrite($g_LogFile, '>Additonal Pack for SoD\Override\* .' & @CRLF)
-        _Extract_MoveModOverride('Additonal Pack for SoD')
+	If FileExists($g_GameDir&'\Realistic Portraits for BG2EE') Then
+        FileWrite($g_LogFile, '>Realistic Portraits for BG2EE\Override\* .' & @CRLF)
+        _Extract_MoveModOverride('Realistic Portraits for BG2EE')
     EndIf
 	If FileExists($g_GameDir&'\Setup-Sheena.TP2') Then
 		FileWrite($g_LogFile, '>Setup-Sheena.TP2 to Sheena\' & @CRLF)
