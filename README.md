@@ -70,12 +70,14 @@ CompReq : ???
 #### Les types de ligne d'installation
 
 ANN : Un commentaire  
+CMT : Un commentaire conditionné à la présence d'un mod  
 CMD : Une commande shell à exécuter  
 DWN : Téléchargement d'un mod  
 STD : Installation d'un composant  
-MUC : Liste de choix de plusieurs composants différents, un seul peut être sélectionné    
-SUB : Liste de choix pour un même composant, généralement car le composant nécessite une entrée manuelle, un seul peut être sélectionné
-GRP : Permet d'installer plusieurs composants en une seule commande
+MUC : Liste de choix de plusieurs composants différents, un seul peut être sélectionné  
+SUB : Liste de choix pour un même composant, généralement car le composant nécessite une entrée manuelle, un seul peut être sélectionné  
+GRP : Permet d'installer plusieurs composants en une seule commande  
+PAUSE : Permet de forcer une pause dans le processus d'installation
 
 #### Les catégories de ligne d'installation
 00 : Général  
