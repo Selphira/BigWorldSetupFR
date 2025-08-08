@@ -420,9 +420,9 @@ Func _Tree_Populate($p_Show=1)
 			If $g_Flags[14] = 'BWP' Then; prevent search if batch-install is used
 				Local $ReadSection[1][2]
 			ElseIf $SelectArray[$s][5] = '--' Then
-				$ReadSection=IniReadSection($g_GConfDir&'\WeiDU-'&_GetTra($ReadSection, 'T')&'.ini', $SelectArray[$s][2])
+				$ReadSection=_IniReadSection($g_GConfDir&'\WeiDU-'&_GetTra($ReadSection, 'T')&'.ini', $SelectArray[$s][2])
 			Else
-				$ReadSection=IniReadSection($g_GConfDir&'\WeiDU-'&$SelectArray[$s][5]&'.ini', $SelectArray[$s][2])
+				$ReadSection=_IniReadSection($g_GConfDir&'\WeiDU-'&$SelectArray[$s][5]&'.ini', $SelectArray[$s][2])
 			EndIf
 			If StringInStr($g_CentralArray[$g_TreeviewItem[$cs][0]][11], 'F') And Not StringRegExp($g_fLock, ','&$SelectArray[$s][2]&'(,|\z)') Then $g_fLock&=','&$SelectArray[$s][2]
 			If $p_Show Then
